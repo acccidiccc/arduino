@@ -1,0 +1,225 @@
+# arduino
+arduino
+ /*
+  LiquidCrystal Library - Hello World
+
+ Demonstrates the use a 16x2 LCD display.  The LiquidCrystal
+ library works with all LCD displays that are compatible with the
+ Hitachi HD44780 driver. There are many of them out there, and you
+ can usually tell them by the 16-pin interface.
+
+ This sketch prints "Hello World!" to the LCD
+ and shows the time.
+
+  The circuit:
+ * LCD RS pin to digital pin 12
+ * LCD Enable pin to digital pin 11
+ * LCD D4 pin to digital pin 5
+ * LCD D5 pin to digital pin 4
+ * LCD D6 pin to digital pin 3
+ * LCD D7 pin to digital pin 2
+ * LCD R/W pin to ground
+ * LCD VSS pin to ground
+ * LCD VCC pin to 5V
+ * 10K resistor:
+ * ends to +5V and ground
+ * wiper to LCD VO pin (pin 3)
+
+ Library originally added 18 Apr 2008
+ by David A. Mellis
+ library modified 5 Jul 2009
+ by Limor Fried (http://www.ladyada.net)
+ example added 9 Jul 2009
+ by Tom Igoe
+ modified 22 Nov 2010
+ by Tom Igoe
+
+ This example code is in the public domain.
+
+ http://www.arduino.cc/en/Tutorial/LiquidCrystal
+ */
+
+// include the library code:
+#include <LiquidCrystal.h>
+#include <Keypad.h>
+#include <string.h>
+const byte ROWS = 4; //four rows
+const byte COLS = 4; //four columns
+//define the two-dimensional array on the buttons of the keypads
+char hexaKeys[ROWS][COLS] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9',' '},
+  {'-','0','+','D'}
+};
+byte rowPins[ROWS] = {40, 38, 36, 34}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {32, 30, 28, 26}; //connect to the column pinouts of the keypad
+
+// initialize the library with the numbers of the interface pins
+Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
+
+String first;
+String second;
+LiquidCrystal lcd(7, 8, 12, 11, 10, 9, 6, 5 , 4, 3);
+void cleanUp() {
+  int k = 0;
+  
+  for(int i = 0; i != 2; i++) {
+    
+    lcd.setCursor(0, k);
+    for(int j = 0; j != 19; j++) {
+      
+      lcd.print(' ');
+    }
+    k++;
+  }
+  lcd.setCursor(0,0);
+}
+void setup() {
+  
+  Serial.begin(9600);
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  lcd.cursor();
+  // Print a message to the LCD.
+  
+}
+int firstint;
+int secondint;
+int count = 0;
+int column =0;
+void loop() {
+  
+  bool twoStep = 0;
+  firstBase:
+  //Serial.print("firstbase");
+   if(count < 0) {
+    count = 0;
+    
+  }
+  else if(count >= 15) {
+    count = 15; 
+  }
+  
+  
+    char customKey = customKeypad.getKey();
+  if (customKey && twoStep == 0){
+    char keyStroke = customKeypad.getKey();
+    keyStroke = customKey;
+    //draw display
+     
+    switch(customKey) {
+   
+      case 'B':
+        --count;
+        lcd.setCursor(count, column);
+        //Serial.print(count);
+        break;
+      case 'A':
+        if(count < 15){
+        ++count;
+        lcd.setCursor(count, column);
+        Serial.print(count);
+        }
+        break;
+      case '-':
+
+        column = 1;
+        lcd.setCursor(0, 1);
+        lcd.print('-');
+        twoStep = 1;
+        lcd.setCursor(3, column);
+        break;
+       case '+':
+
+
+        column = 1;
+        lcd.setCursor(0, 1);
+        lcd.print('+');
+        twoStep = 1;
+        lcd.setCursor(3, column);
+        break;
+      
+      case 'D':
+        cleanUp();
+        count = 0;
+        break;
+        
+        
+      default:
+      
+      if(first.length() < 15){
+        long  currentnumber = customKey;
+        /*firstint +=*/ currentnumber = pow(10, count);
+        Serial.print(firstint);
+        Serial.print(" ");
+        Serial.print(currentnumber);
+        Serial.print(" ");
+        lcd.print(currentnumber);
+        ++count;
+      }
+        break;
+
+
+
+
+
+
+
+        
+        
+    }
+    digitalWrite(LED_BUILTIN, HIGH);
+    //Serial.print("FirstStatement ");
+    goto firstBase;
+   
+   
+    
+  }
+  
+ 
+  //Serial.print("exec ");
+    if (customKey && twoStep == 1) {
+
+      count = 0;
+    
+    switch(customKey) {
+   
+      case 'B':
+      if (count > 3){
+        --count;
+        lcd.setCursor(count, column);
+        //Serial.print(count);
+      }
+        break;
+      case 'A':
+        if(count < 15){
+        ++count;
+        lcd.setCursor(count - 1, column);
+        //Serial.print(count);
+        }
+        break;
+      case '-':
+        break;
+      case '+':
+        break;
+      case 'D':
+        cleanUp();
+        count = 0;
+        break;
+      default:
+      if(count < 15){
+        cleanUp();
+        second = second + customKey;
+        lcd.print(second);
+        ++count;
+      }
+        break;
+        
+    }
+    digitalWrite(LED_BUILTIN, HIGH);
+    Serial.print("secondStatement ");
+    }
+}
