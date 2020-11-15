@@ -152,7 +152,7 @@ void loop() {
       
       if(first.length() < 15){
         long  currentnumber = customKey;
-        /*firstint +=*/ currentnumber = pow(10, count);
+        /*firstint +=*/ firstint += currentnumber * 10 ^ count;
         Serial.print(firstint);
         Serial.print(" ");
         Serial.print(currentnumber);
@@ -212,7 +212,7 @@ void loop() {
       default:
       if(count < 15){
         cleanUp();
-        second = second + customKey;
+        second = second + customKey ^ count;
         lcd.print(second);
         ++count;
       }
